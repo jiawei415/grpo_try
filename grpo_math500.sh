@@ -1,7 +1,7 @@
 TIME_TAG=$(date "+%Y%m%d_%H%M%S")
 
 MODEL=Llama-3.2-3B-Instruct
-DATA=gsm8k
+DATA=MATH-500
 
 SHELL_PATH=$(dirname $(readlink -f "$0"))
 BASE_PATH=/apdcephfs_cq10/share_1150325/ztjiaweixu/huggingface
@@ -19,6 +19,7 @@ export WANDB_DIR=$OUTPUT_PATH
 export WANDB_CACHE_DIR=$OUTPUT_PATH/wandb/cache
 export WANDB_ARTIFACT_DIR=$OUTPUT_PATH/wandb/artifact
 
+
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 NPROC_PER_NODE=8 \
 MASTER_PORT=29500 \
@@ -26,7 +27,7 @@ swift rlhf \
     --rlhf_type grpo \
     --model ${BASE_PATH}/${MODEL} \
     --external_plugins ${SHELL_PATH}/plugin/plugin.py \
-    --reward_funcs external_gsm8k format \
+    --reward_funcs accuracy format \
     --use_vllm false \
     --vllm_device auto \
     --vllm_gpu_memory_utilization 0.7 \
@@ -34,8 +35,7 @@ swift rlhf \
     --train_type full \
     --vllm_enable_prefix_caching false \
     --torch_dtype float16 \
-    --dataset ${BASE_PATH}/${DATA} \
-    --custom_register_path ${SHELL_PATH}/dataset/dataset.py \
+    --dataset ${BASE_PATH}/${DATA}/test.jsonl \
     --max_completion_length 2048 \
     --num_train_epochs 1 \
     --per_device_train_batch_size 4 \
